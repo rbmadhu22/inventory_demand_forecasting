@@ -1,0 +1,9 @@
+
+import joblib
+
+# Suppose your best model is Ridge Regression
+best_model = Ridge(alpha=1.0)
+best_model.fit(X_train_scaled, Y_train)
+
+# Save it
+joblib.dump(best_model, 'model.pkl')

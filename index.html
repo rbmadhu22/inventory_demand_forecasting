@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retail Inventory Prediction</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Retail Store Demand Prediction</h1>
+        <p class="text-center">Enter the product details to predict demand class.</p>
+
+        <form id="prediction-form">
+            <div class="form-group">
+                <label for="price">Price ($):</label>
+                <input type="number" class="form-control" id="price" placeholder="Enter Price" required>
+            </div>
+            <div class="form-group">
+                <label for="discount">Discount (%):</label>
+                <input type="number" class="form-control" id="discount" placeholder="Enter Discount" required>
+            </div>
+            <div class="form-group">
+                <label for="demand-forecast">Demand Forecast (Units):</label>
+                <input type="number" class="form-control" id="demand-forecast" placeholder="Enter Demand Forecast" required>
+            </div>
+            <div class="form-group">
+                <label for="competitor-pricing">Competitor Pricing ($):</label>
+                <input type="number" class="form-control" id="competitor-pricing" placeholder="Enter Competitor Pricing" required>
+            </div>
+            <div class="form-group">
+                <label for="inventory-level">Inventory Level:</label>
+                <input type="number" class="form-control" id="inventory-level" placeholder="Enter Inventory Level" required>
+            </div>
+            <div class="form-group">
+                <label for="units-ordered">Units Ordered:</label>
+                <input type="number" class="form-control" id="units-ordered" placeholder="Enter Units Ordered" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Predict Demand</button>
+        </form>
+
+        <div id="result" class="result" style="display:none;">
+            <h3>Prediction Results:</h3>
+            <p><strong>Predicted Demand Class:</strong> <span id="demand-class"></span></p>
+            <p><strong>Linear Regression Error:</strong> <span id="linear-error"></span></p>
+            <p><strong>Lasso Regression Error:</strong> <span id="lasso-error"></span></p>
+            <p><strong>Ridge Regression Error:</strong> <span id="ridge-error"></span></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('prediction-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const price = document.getElementById('price').value;
+            const discount = document.getElementById('discount').value;
+            const demandForecast = document.getElementById('demand-forecast').value;
+            const competitorPricing = document.getElementById('competitor-pricing').value;
+            const inventoryLevel = document.getElementById('inventory-level').value;
+            const unitsOrdered = document.getElementById('units-ordered').value;
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    price: price,
+                    discount: discount,
+                    demand_forecast: demandForecast,
+                    competitor_pricing: competitorPricing,
+                    inventory_level: inventoryLevel,
+                    units_ordered: unitsOrdered,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('demand-class').innerText = data.demand_class;
+                document.getElementById('linear-error').innerText = data.linear_error;
+                document.getElementById('lasso-error').innerText = data.lasso_error;
+                document.getElementById('ridge-error').innerText = data.ridge_error;
+                document.getElementById('result').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error predicting demand!');
+            });
+        });
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

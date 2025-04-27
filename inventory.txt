@@ -1,0 +1,63 @@
+
+import streamlit as st
+import pandas as pd
+import joblib
+import numpy as np
+import time
+
+# Load the trained model (make sure the model.pkl file exists)
+model = joblib.load('model.pkl')
+
+# Streamlit User Interface
+st.title("Retail Store Demand Prediction")
+
+# Input fields for user data
+price = st.number_input("Price ($)", min_value=0.0, value=10.0)
+discount = st.number_input("Discount (%)", min_value=0.0, max_value=100.0, value=10.0)
+demand_forecast = st.number_input("Demand Forecast (Units)", min_value=0, value=100)
+competitor_pricing = st.number_input("Competitor Pricing ($)", min_value=0.0, value=10.0)
+inventory_level = st.number_input("Inventory Level", min_value=0, value=100)
+units_ordered = st.number_input("Units Ordered", min_value=0, value=50)
+
+# Calculate discounted price
+discounted_price = price * (1 - discount / 100)
+
+# Prepare the feature vector for prediction
+# Ensure the feature order matches what your model expects
+user_input = np.array([[price, discount, demand_forecast, competitor_pricing,
+                        inventory_level, units_ordered, discounted_price]])
+
+# When the "Predict" button is pressed
+if st.button("Predict Demand Class"):
+    # Make prediction using the trained model
+    prediction = model.predict(user_input)
+
+    # Display the result
+    st.write(f"Predicted Demand Class: {prediction[0]}")
+
+    # Optionally, display other model information (error or confidence score)
+    # For example, if you want to show regression error (for regression tasks)
+    if hasattr(model, "score"):
+        score = model.score(user_input, prediction)
+        st.write(f"Model's Confidence Score: {score:.2f}")
+
+    # Generate filename dynamically based on current timestamp
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    filename = f"demand_prediction_{timestamp}.txt"
+
+    # Save the prediction results to a file
+    with open(filename, "w") as f:
+        f.write(f"Prediction for:\nPrice: {price}\nDiscount: {discount}\n")
+        f.write(f"Demand Forecast: {demand_forecast}\nCompetitor Pricing: {competitor_pricing}\n")
+        f.write(f"Inventory Level: {inventory_level}\nUnits Ordered: {units_ordered}\n")
+        f.write(f"Discounted Price: {discounted_price:.2f}\n")
+        f.write(f"Predicted Demand Class: {prediction[0]}\n")
+
+    # Provide a download link for the generated text file
+    with open(filename, "r") as file:
+        st.download_button(
+            label="Download Prediction Results",
+            data=file,
+            file_name=filename,  # Dynamically set the file name
+            mime="text/plain"
+        )

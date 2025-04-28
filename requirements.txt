@@ -1,0 +1,10 @@
+streamlit
+flask
+requests
+scikit-learn
+pandas
+matplotlib
+numpy
+joblib
+scipy
+threadpoolctl
